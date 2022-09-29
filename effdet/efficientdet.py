@@ -214,16 +214,17 @@ class FpnCombine(nn.Module):
         if self.weight_method == 'attn':
             normalized_weights = torch.softmax(self.edge_weights.to(dtype=dtype), dim=0)
             out = torch.stack(nodes, dim=-1) * normalized_weights
+            raise NotImplementedError
         elif self.weight_method == 'fastattn':
             edge_weights = nn.functional.relu(self.edge_weights.to(dtype=dtype))
             weights_sum = torch.sum(edge_weights)
-            out = torch.stack(
-                [(nodes[i] * edge_weights[i]) / (weights_sum + 0.0001) for i in range(len(nodes))], dim=-1)
+            out = sum(
+                [(nodes[i] * edge_weights[i]) / (weights_sum + 0.0001) for i in range(len(nodes))])
         elif self.weight_method == 'sum':
-            out = torch.stack(nodes, dim=-1)
+            out = sum(nodes)
         else:
             raise ValueError('unknown weight_method {}'.format(self.weight_method))
-        out = torch.sum(out, dim=-1)
+        # out = torch.sum(out, dim=-1)
         return out
 
 
